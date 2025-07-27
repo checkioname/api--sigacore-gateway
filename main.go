@@ -1,27 +1,38 @@
 package main
 
 import (
-	"net/http"
-	"net/http/httputil"
-	"net/url"
+	"context"
+	"log"
+	"os"
+
+	"api--sigacore-gateway/api"
+	db "api--sigacore-gateway/db/sqlc"
+	"api--sigacore-gateway/util"
+
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 func main() {
-	// Roteador principal
-	mux := chi.NewRouter()
+	config, err := util.LoadConfig()
+	if err != nil {
+		log.Fatal("cannot load config:", err)
+	}
 
-	// Middleware de autenticação que você criaria
-	mux.Use(seuMiddlewareDeAuth)
+	connPool, err := pgxpool.New(context.Background(), config.ConnStr)
+	if err != nil {
+		log.Fatal("cannot connect to db:", err)
+	}
+	defer connPool.Close()
 
-	// Rota para o serviço de clientes (gRPC-Gateway)
-	urlClientes, _ := url.Parse("http://localhost:9090")
-	proxyClientes := httputil.NewSingleHostReverseProxy(urlClientes)
-	mux.Handle("/clientes/*", proxyClientes)
+	store := db.NewStore(connPool)
+	server, err := api.NewServer(config, store)
+	if err != nil {
+		log.Fatal("cannot create server:", err)
+	}
 
-	// Rota para o serviço de relatórios (outra API HTTP)
-	urlRelatorios, _ := url.Parse("http://localhost:8081")
-	proxyRelatorios := httputil.NewSingleHostReverseProxy(urlRelatorios)
-	mux.Handle("/relatorios/*", proxyRelatorios)
-
-	http.ListenAndServe(":8080", mux)
+	log.Printf("Starting Auth Service on %s", config.AuthServerAddress)
+	err = server.Start(config.AuthServerAddress)
+	if err != nil {
+		log.Fatal("cannot start server:", err)
+	}
 }
