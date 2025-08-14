@@ -1,20 +1,24 @@
 package handlers
 
 import (
+	"context"
+	"database/sql"
+	"fmt"
+	"log"
+	"net/http"
+	"strings"
+	"time"
+	
 	"api--sigacore-gateway/internal/auth/models"
 	"api--sigacore-gateway/internal/auth/services"
 	db "api--sigacore-gateway/internal/db/sqlc"
 	token2 "api--sigacore-gateway/internal/token"
 	"api--sigacore-gateway/internal/util"
-	"database/sql"
-	"fmt"
-	"log"
-	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"golang.org/x/time/rate"
 )
 
 type AuthHandler struct {
@@ -34,6 +38,9 @@ func NewAuthHandler(authService services.AuthService, tokenMaker token2.Maker, c
 }
 
 func (h *AuthHandler) CreateUser(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 30*time.Second)
+	defer cancel()
+
 	var req models.CreateUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -53,7 +60,8 @@ func (h *AuthHandler) CreateUser(c *gin.Context) {
 		Email:          req.Email,
 		HashedPassword: hashed,
 	}
-	user, err := h.s.CreateUser(c, args)
+
+	user, err := h.s.CreateUser(ctx, args)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -72,8 +80,7 @@ type loginResponse struct {
 	AccessToken           string    `json:"access_token"`
 	AccessTokenExpiresAt  time.Time `json:"access_token_expires_at"`
 	RefreshToken          string    `json:"refresh_token"`
-	RefreshTokenExpiresAt time.Time `json:"refresh_token_expires_at"`
-	User                  string    `json:"user"`
+	RefreshTokenExpiresAt time.Time `json:"refresh_token_expires_at"`	User                  string    `json:"user"`
 }
 
 func (h *AuthHandler) LoginUser(c *gin.Context) {
@@ -164,7 +171,8 @@ func (h *AuthHandler) GetUser(c *gin.Context) {
 
 	c.JSON(http.StatusOK, models.NewUserResponse(user))
 }
-
 func errResponse(c *gin.Context, statusCode int, err error) {
 	c.AbortWithStatusJSON(statusCode, gin.H{"error": err.Error()})
 }
+
+

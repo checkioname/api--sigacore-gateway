@@ -13,4 +13,4 @@ func NewReverseProxy(targetURL string) (http.Handler, error) {
 		return nil, err
 	}
 	return httputil.NewSingleHostReverseProxy(target), nil
-} 
+}

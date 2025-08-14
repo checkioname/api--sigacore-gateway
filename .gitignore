@@ -1,0 +1,224 @@
+# ============================================
+# BINÁRIOS E BUILDS
+# ============================================
+# Binários compilados
+/bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# ============================================
+# ARQUIVOS DE CONFIGURAÇÃO SENSÍVEIS
+# ============================================
+# CRÍTICO: Nunca comitar arquivos com credenciais reais
+*.env.production
+*.env.prod
+*.env.staging
+production.env
+prod.env
+staging.env
+
+# Arquivos de configuração locais
+.env.local
+.env.*.local
+
+# Chaves e certificados
+*.key
+*.pem
+*.crt
+*.p12
+*.pfx
+secrets/
+keys/
+
+# Configurações de banco específicas
+database.yml
+database.json
+
+# ============================================
+# LOGS E DADOS TEMPORÁRIOS
+# ============================================
+# Logs
+*.log
+logs/
+log/
+
+# Dados temporários
+tmp/
+temp/
+.tmp/
+
+# Coverage reports
+*.out
+coverage.html
+coverage.txt
+
+# ============================================
+# FERRAMENTAS DE DESENVOLVIMENTO
+# ============================================
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool
+*.cover
+
+# Dependency directories
+vendor/
+
+# Go workspace file
+go.work
+go.work.sum
+
+# ============================================
+# IDEs E EDITORES
+# ============================================
+# GoLand/IntelliJ
+.idea/
+*.iml
+
+# VS Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# ============================================
+# SISTEMA OPERACIONAL
+# ============================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.tmp
+*.temp
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# ============================================
+# DOCKER E INFRAESTRUTURA
+# ============================================
+# Docker
+.dockerignore
+
+# Terraform
+*.tfstate
+*.tfstate.*
+*.tfvars
+.terraform/
+.terraform.lock.hcl
+
+# Ansible
+*.retry
+
+# ============================================
+# BASES DE DADOS
+# ============================================
+# SQLite
+*.sqlite
+*.sqlite3
+*.db
+
+# PostgreSQL dumps
+*.sql.gz
+*.dump
+
+# ============================================
+# ARQUIVOS DE BACKUP E TEMPORÁRIOS
+# ============================================
+# Backups
+*.backup
+*.bak
+*.orig
+*.save
+
+# Patches
+*.patch
+*.diff
+
+# ============================================
+# ARQUIVOS ESPECÍFICOS DO PROJETO
+# ============================================
+# Excalidraw auto-save
+*.excalidraw.bak
+
+# Arquivos de migração temporários
+migrations/temp/
+
+# Relatórios de teste
+test-results/
+junit.xml
+
+# Profiling
+*.pprof
+
+# ============================================
+# ARQUIVOS QUE DEVEM SER COMMITADOS
+# ============================================
+# IMPORTANTE: Estes arquivos DEVEM estar no repositório:
+# - app.env (apenas para desenvolvimento)
+# - deployment/production.env.example (template)
+# - deployment/*.example
+# - config/*.example
+
+# ============================================
+# PADRÕES DE EMERGÊNCIA
+# ============================================
+# Em caso de vazamento acidental, procure por:
+# - Senhas em plain text
+# - Chaves de API
+# - Tokens de acesso
+# - Certificados privados
+# - Strings de conexão de banco
+
+# Use: git filter-branch ou BFG Repo-Cleaner para limpar histórico 

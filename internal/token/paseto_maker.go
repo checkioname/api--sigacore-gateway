@@ -40,12 +40,12 @@ func (pm *PasetoMaker) VerifyToken(token string) (*Payload, error) {
 	payload := &Payload{}
 	err := pm.paseto.Decrypt(token, pm.symmetricKey, payload, nil)
 	if err != nil {
-		return nil, fmt.Errorf("VerifyToken: %w", err)
+		return nil, &TokenError{Op: "decrypt", Err: ErrTokenInvalid}
 	}
 
 	err = payload.Valid()
 	if err != nil {
-		return nil, fmt.Errorf("VerifyToken: %w", err)
+		return nil, &TokenError{Op: "validate", Err: ErrTokenExpired}
 	}
 
 	return payload, nil

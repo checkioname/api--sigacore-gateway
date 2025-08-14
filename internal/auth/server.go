@@ -8,8 +8,11 @@ import (
 	token2 "api--sigacore-gateway/internal/token"
 	"api--sigacore-gateway/internal/util"
 	"context"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -22,6 +25,14 @@ type AuthServer struct {
 
 func NewAuthServer(cfg util.Config, store db.Store) (*AuthServer, error) {
 	ctx := context.Background()
+
+	v, ok := binding.Validator.Engine().(*validator.Validate)
+	if ok {
+		err := v.RegisterValidation("username", validUsername)
+		if err != nil {
+			return nil, fmt.Errorf("RegisterValidationCtx: %w", err)
+		}
+	}
 
 	tokenMaker, err := token2.NewPasetoMaker(cfg.TokenSymmetricKey)
 	conn, err := pgxpool.New(ctx, cfg.ConnStr)
