@@ -28,8 +28,7 @@ func SetupGatewayRoutes(cfg util.Config) *gin.Engine {
 	router := gin.Default()
 
 	// proxies
-	router.Any("/users", gin.HandlerFunc(func(ctx *gin.Context) {
-
+	router.Any("/*users", gin.HandlerFunc(func(ctx *gin.Context) {
 		target, _ := url.Parse("http://localhost:8081")
 		proxy := httputil.NewSingleHostReverseProxy(target)
 
@@ -38,9 +37,9 @@ func SetupGatewayRoutes(cfg util.Config) *gin.Engine {
 	fmt.Println("✅ Rota POST /users registrada")
 
 	// Health check
-	router.GET("/health", gin.HandlerFunc(func(ctx *gin.Context) {
-		ctx.JSON(200, gin.H{"status": "Gateway service is healthy"})
-	}))
+	// router.GET("/health", gin.HandlerFunc(func(ctx *gin.Context) {
+	// 	ctx.JSON(200, gin.H{"status": "Gateway service is healthy"})
+	// }))
 
 	return router
 }

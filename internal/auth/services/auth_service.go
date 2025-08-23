@@ -1,17 +1,17 @@
 package services
 
 import (
-	db "api--sigacore-gateway/internal/db/sqlc"
-	token2 "api--sigacore-gateway/internal/token"
-	"api--sigacore-gateway/internal/util"
 	"context"
 	"database/sql"
 	"fmt"
 	"time"
 
-	"api--sigacore-gateway/internal/auth/models"
-
 	"github.com/gin-gonic/gin"
+
+	"api--sigacore-gateway/internal/auth/models"
+	db "api--sigacore-gateway/internal/db/sqlc"
+	token2 "api--sigacore-gateway/internal/token"
+	"api--sigacore-gateway/internal/util"
 )
 
 type AuthService interface {

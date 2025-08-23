@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -18,6 +19,8 @@ import (
 	token2 "api--sigacore-gateway/internal/token"
 	"api--sigacore-gateway/internal/util"
 )
+
+var Err_UserNotFound = errors.New("usuário não encontrado")
 
 type AuthHandler struct {
 	s           db.Store
@@ -36,7 +39,6 @@ func NewAuthHandler(authService services.AuthService, tokenMaker token2.Maker, c
 }
 
 func (h *AuthHandler) CreateUser(c *gin.Context) {
-	fmt.Println("O CREATE USER RECEBEU REQUEST")
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 30*time.Second)
 	defer cancel()
 
@@ -93,8 +95,8 @@ func (h *AuthHandler) LoginUser(c *gin.Context) {
 	user, err := h.s.GetUser(c, req.Username)
 	if err != nil {
 		log.Printf("loginUser: %v", err)
-		if err == sql.ErrNoRows {
-			errResponse(c, http.StatusNotFound, err)
+		if user.FullName == "" {
+			errResponse(c, http.StatusNotFound, Err_UserNotFound)
 			return
 		}
 		errResponse(c, http.StatusInternalServerError, err)
