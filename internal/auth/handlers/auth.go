@@ -6,19 +6,17 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strings"
 	"time"
-	
+
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgxpool"
+
 	"api--sigacore-gateway/internal/auth/models"
 	"api--sigacore-gateway/internal/auth/services"
 	db "api--sigacore-gateway/internal/db/sqlc"
 	token2 "api--sigacore-gateway/internal/token"
 	"api--sigacore-gateway/internal/util"
-
-	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgxpool"
-	"golang.org/x/time/rate"
 )
 
 type AuthHandler struct {
@@ -38,6 +36,7 @@ func NewAuthHandler(authService services.AuthService, tokenMaker token2.Maker, c
 }
 
 func (h *AuthHandler) CreateUser(c *gin.Context) {
+	fmt.Println("O CREATE USER RECEBEU REQUEST")
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 30*time.Second)
 	defer cancel()
 
@@ -80,7 +79,8 @@ type loginResponse struct {
 	AccessToken           string    `json:"access_token"`
 	AccessTokenExpiresAt  time.Time `json:"access_token_expires_at"`
 	RefreshToken          string    `json:"refresh_token"`
-	RefreshTokenExpiresAt time.Time `json:"refresh_token_expires_at"`	User                  string    `json:"user"`
+	RefreshTokenExpiresAt time.Time `json:"refresh_token_expires_at"`
+	User                  string    `json:"user"`
 }
 
 func (h *AuthHandler) LoginUser(c *gin.Context) {
@@ -174,5 +174,3 @@ func (h *AuthHandler) GetUser(c *gin.Context) {
 func errResponse(c *gin.Context, statusCode int, err error) {
 	c.AbortWithStatusJSON(statusCode, gin.H{"error": err.Error()})
 }
-
-

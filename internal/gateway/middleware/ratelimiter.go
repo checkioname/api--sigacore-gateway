@@ -16,7 +16,7 @@ type CustomRateLimiter struct {
 	cleanInterval time.Duration
 }
 
-func NewRateLimiter(ipLimit, userLimit rate.Limit, cleanInterval time.Duration) *CustomRateLimiter {
+func NewRateLimiter(ipLimit, userLimit rate.Limit) *CustomRateLimiter {
 	rl := &CustomRateLimiter{
 		ipLimiters:    make(map[string]*rate.Limiter),
 		userLimiters:  make(map[string]*rate.Limiter),

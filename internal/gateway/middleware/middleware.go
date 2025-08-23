@@ -43,6 +43,7 @@ func IPWhitelist(allowedIPs ...string) func(http.Handler) http.Handler {
 // RateLimiter cria um middleware de limite de requisições.
 func RateLimiter(r rate.Limit, b int) func(http.Handler) http.Handler {
 	limiter := rate.NewLimiter(r, b)
+
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if !limiter.Allow() {

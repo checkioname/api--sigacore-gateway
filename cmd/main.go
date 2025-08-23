@@ -5,12 +5,12 @@ import (
 	"log"
 	"sync"
 
+	"github.com/jackc/pgx/v5/pgxpool"
+
 	"api--sigacore-gateway/internal/auth"
 	db "api--sigacore-gateway/internal/db/sqlc"
 	"api--sigacore-gateway/internal/gateway"
 	"api--sigacore-gateway/internal/util"
-
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 func main() {
@@ -47,7 +47,7 @@ func main() {
 	var wg sync.WaitGroup
 	wg.Add(2)
 
-	// Iniciar Auth Service
+	// // Iniciar Auth Service
 	go func() {
 		defer wg.Done()
 		log.Printf("Starting Auth Service on %s", config.AuthServerAddress)

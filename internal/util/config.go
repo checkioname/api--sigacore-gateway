@@ -20,7 +20,7 @@ type Config struct {
 	RefreshTokenDuration       time.Duration `mapstructure:"REFRESH_TOKEN_DURATION"`
 	AllowedIPs                 []string      `mapstructure:"ALLOWED_IPS"`
 	UserServiceAddress         string        `mapstructure:"USER_SERVICE_ADDRESS"`
-	ReportServiceAddress       string        `mapstructure:"REPORT_SERVICE_ADDRESS"`
+	DocServiceAddress          string        `mapstructure:"DOC_SERVICE_ADDRESS"`
 	NotificationServiceAddress string        `mapstructure:"NOTIFICATION_SERVICE_ADDRESS"`
 }
 
@@ -166,7 +166,7 @@ func validateDatabaseConfig(connStr, environment string) error {
 
 	// Em produção, garantir que não usa credenciais padrão
 	if environment == EnvProduction {
-		if strings.Contains(connStr, "root:secret") {
+		if strings.Contains(connStr, "admin:admin") {
 			return fmt.Errorf("default database credentials detected in production")
 		}
 		if !strings.Contains(connStr, "sslmode=require") && !strings.Contains(connStr, "sslmode=verify-full") {
@@ -183,7 +183,7 @@ func validateServiceAddresses(config *Config) error {
 		"AUTH_SERVER_ADDRESS":          config.AuthServerAddress,
 		"GATEWAY_SERVER_ADDRESS":       config.GatewayServerAddress,
 		"USER_SERVICE_ADDRESS":         config.UserServiceAddress,
-		"REPORT_SERVICE_ADDRESS":       config.ReportServiceAddress,
+		"DOC_SERVICE_ADDRESS":          config.DocServiceAddress,
 		"NOTIFICATION_SERVICE_ADDRESS": config.NotificationServiceAddress,
 	}
 

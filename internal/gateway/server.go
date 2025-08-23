@@ -1,17 +1,18 @@
 package gateway
 
 import (
-	"api--sigacore-gateway/internal/util"
 	"log"
-	"net/http"
+
+	"github.com/gin-gonic/gin"
 
 	"api--sigacore-gateway/internal/gateway/router"
 	"api--sigacore-gateway/internal/token"
+	"api--sigacore-gateway/internal/util"
 )
 
 type GatewayServer struct {
 	config     util.Config
-	router     *router.GatewayRouter
+	router     *gin.Engine
 	tokenMaker token.Maker
 }
 
@@ -21,14 +22,9 @@ func NewGatewayServer(cfg util.Config) (*GatewayServer, error) {
 		return nil, err
 	}
 
-	gatewayRouter, err := router.NewGatewayRouter(cfg, tokenMaker)
-	if err != nil {
-		return nil, err
-	}
-
 	return &GatewayServer{
 		config:     cfg,
-		router:     gatewayRouter,
+		router:     router.SetupGatewayRoutes(cfg),
 		tokenMaker: tokenMaker,
 	}, nil
 }
@@ -38,9 +34,8 @@ func (s *GatewayServer) Start() error {
 	log.Printf("📍 Serviços configurados:")
 	log.Printf("   - Auth Service: %s", s.config.AuthServerAddress)
 	log.Printf("   - User Service: %s", s.config.UserServiceAddress)
-	log.Printf("   - Report Service: %s", s.config.ReportServiceAddress)
-	log.Printf("   - Notification Service: %s", s.config.NotificationServiceAddress)
+	log.Printf("   - Report Service: %s", s.config.DocServiceAddress)
 	log.Printf("🔒 IPs permitidos: %v", s.config.AllowedIPs)
 
-	return http.ListenAndServe(s.config.GatewayServerAddress, s.router.Handler())
+	return s.router.Run(s.config.GatewayServerAddress)
 }

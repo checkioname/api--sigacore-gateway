@@ -1,12 +1,6 @@
 package auth
 
 import (
-	"api--sigacore-gateway/internal/auth/handlers"
-	"api--sigacore-gateway/internal/auth/services"
-	db "api--sigacore-gateway/internal/db/sqlc"
-	"api--sigacore-gateway/internal/shared/middleware"
-	token2 "api--sigacore-gateway/internal/token"
-	"api--sigacore-gateway/internal/util"
 	"context"
 	"fmt"
 
@@ -14,6 +8,13 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
 	"github.com/jackc/pgx/v5/pgxpool"
+
+	"api--sigacore-gateway/internal/auth/handlers"
+	"api--sigacore-gateway/internal/auth/services"
+	db "api--sigacore-gateway/internal/db/sqlc"
+	"api--sigacore-gateway/internal/shared/middleware"
+	token2 "api--sigacore-gateway/internal/token"
+	"api--sigacore-gateway/internal/util"
 )
 
 type AuthServer struct {
