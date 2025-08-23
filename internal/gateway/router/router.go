@@ -2,6 +2,8 @@ package router
 
 import (
 	"fmt"
+	"net/http/httputil"
+	"net/url"
 
 	"github.com/gin-gonic/gin"
 
@@ -26,19 +28,13 @@ func SetupGatewayRoutes(cfg util.Config) *gin.Engine {
 	router := gin.Default()
 
 	// proxies
-	router.POST("/users", gin.HandlerFunc(func(ctx *gin.Context) {
-		ctx.JSON(200, gin.H{"status": "Auth service is healthy"})
-		// fmt.Printf("DEBUG: Recebido %s %s\n", r.Method, r.URL.Path)
+	router.Any("/users", gin.HandlerFunc(func(ctx *gin.Context) {
 
-		// target, _ := url.Parse("http://localhost:8081")
-		// proxy := httputil.NewSingleHostReverseProxy(target)
+		target, _ := url.Parse("http://localhost:8081")
+		proxy := httputil.NewSingleHostReverseProxy(target)
 
-		// proxy.ServeHTTP(w, r)
+		proxy.ServeHTTP(ctx.Writer, ctx.Request)
 	}))
-
-	// 	func(w http.ResponseWriter, r *http.Request) {
-	// }))
-
 	fmt.Println("✅ Rota POST /users registrada")
 
 	// Health check
