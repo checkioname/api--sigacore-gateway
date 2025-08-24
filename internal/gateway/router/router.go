@@ -27,6 +27,20 @@ import (
 func SetupGatewayRoutes(cfg util.Config) *gin.Engine {
 	router := gin.Default()
 
+	// Configurar CORS
+	router.Use(func(c *gin.Context) {
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
+
+		c.Next()
+	})
+
 	// proxies
 	router.Any("/*users", gin.HandlerFunc(func(ctx *gin.Context) {
 		target, _ := url.Parse("http://localhost:8081")
@@ -36,7 +50,7 @@ func SetupGatewayRoutes(cfg util.Config) *gin.Engine {
 	}))
 	fmt.Println("✅ Rota POST /users registrada")
 
-	// Health check
+	// // Health check
 	// router.GET("/health", gin.HandlerFunc(func(ctx *gin.Context) {
 	// 	ctx.JSON(200, gin.H{"status": "Gateway service is healthy"})
 	// }))
