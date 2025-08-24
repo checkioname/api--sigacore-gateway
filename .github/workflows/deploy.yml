@@ -21,13 +21,11 @@ jobs:
 
     - name: Run tests
       run: |
-        cd api--sigacore-gateway
         go mod tidy
         go test ./...
 
     - name: Build application
       run: |
-        cd api--sigacore-gateway
         go build -o bin/gateway cmd/main.go
 
     - name: Setup SSH
@@ -48,7 +46,7 @@ jobs:
         "
         
         # Enviar arquivos para EC2
-        scp -r api--sigacore-gateway/* ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/opt/sigacore-gateway/
+        scp -r ./* ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/opt/sigacore-gateway/
         
         # Executar deploy no EC2
         ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "
@@ -70,7 +68,7 @@ jobs:
           /usr/local/go/bin/go build -o bin/gateway cmd/main.go
           
           # Configurar variáveis de ambiente
-          sudo tee /etc/systemd/system/sigacore-gateway.service > /dev/null <<EOF
+          sudo tee /etc/systemd/system/sigacore-gateway.service > /dev/null << 'SYSTEMD_EOF'
 [Unit]
 Description=SigaCore Gateway
 After=network.target
@@ -94,7 +92,7 @@ Environment=SIGADOCS_SERVICE_URL=${{ secrets.SIGADOCS_SERVICE_URL }}
 
 [Install]
 WantedBy=multi-user.target
-EOF
+SYSTEMD_EOF
           
           # Recarregar systemd e iniciar serviço
           sudo systemctl daemon-reload
