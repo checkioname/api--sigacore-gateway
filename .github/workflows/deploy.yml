@@ -1,0 +1,138 @@
+name: Deploy Gateway to EC2
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.21'
+
+    - name: Run tests
+      run: |
+        cd api--sigacore-gateway
+        go mod tidy
+        go test ./...
+
+    - name: Build application
+      run: |
+        cd api--sigacore-gateway
+        go build -o bin/gateway cmd/main.go
+
+    - name: Setup SSH
+      uses: webfactory/ssh-agent@v0.8.0
+      with:
+        ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
+
+    - name: Add EC2 to known hosts
+      run: |
+        ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
+    - name: Deploy to EC2
+      run: |
+        # Criar diretório no EC2 se não existir
+        ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "
+          sudo mkdir -p /opt/sigacore-gateway
+          sudo chown ${{ secrets.EC2_USER }}:${{ secrets.EC2_USER }} /opt/sigacore-gateway
+        "
+        
+        # Enviar arquivos para EC2
+        scp -r api--sigacore-gateway/* ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/opt/sigacore-gateway/
+        
+        # Executar deploy no EC2
+        ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "
+          cd /opt/sigacore-gateway
+          
+          # Parar serviço anterior se existir
+          sudo pkill -f gateway || true
+          
+          # Instalar dependências Go se necessário
+          if ! command -v go &> /dev/null; then
+            wget https://go.dev/dl/go1.21.0.linux-amd64.tar.gz
+            sudo tar -C /usr/local -xzf go1.21.0.linux-amd64.tar.gz
+            echo 'export PATH=\$PATH:/usr/local/go/bin' >> ~/.bashrc
+            source ~/.bashrc
+          fi
+          
+          # Build da aplicação
+          /usr/local/go/bin/go mod tidy
+          /usr/local/go/bin/go build -o bin/gateway cmd/main.go
+          
+          # Configurar variáveis de ambiente
+          sudo tee /etc/systemd/system/sigacore-gateway.service > /dev/null <<EOF
+[Unit]
+Description=SigaCore Gateway
+After=network.target
+
+[Service]
+Type=simple
+User=${{ secrets.EC2_USER }}
+WorkingDirectory=/opt/sigacore-gateway
+ExecStart=/opt/sigacore-gateway/bin/gateway
+Restart=always
+RestartSec=5
+Environment=PORT=8080
+Environment=DB_HOST=${{ secrets.DB_HOST }}
+Environment=DB_PORT=${{ secrets.DB_PORT }}
+Environment=DB_USER=${{ secrets.DB_USER }}
+Environment=DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+Environment=DB_NAME=${{ secrets.DB_NAME }}
+Environment=JWT_SECRET=${{ secrets.JWT_SECRET }}
+Environment=SIGACORE_SERVICE_URL=${{ secrets.SIGACORE_SERVICE_URL }}
+Environment=SIGADOCS_SERVICE_URL=${{ secrets.SIGADOCS_SERVICE_URL }}
+
+[Install]
+WantedBy=multi-user.target
+EOF
+          
+          # Recarregar systemd e iniciar serviço
+          sudo systemctl daemon-reload
+          sudo systemctl enable sigacore-gateway
+          sudo systemctl restart sigacore-gateway
+          
+          # Aguardar inicialização
+          sleep 10
+        "
+
+    - name: Health Check
+      run: |
+        # Verificar se o serviço está rodando
+        ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "
+          sudo systemctl is-active sigacore-gateway
+        "
+        
+        # Testar endpoint de saúde
+        for i in {1..5}; do
+          if curl -f http://${{ secrets.EC2_HOST }}:8080/health; then
+            echo '✅ Gateway está funcionando!'
+            exit 0
+          fi
+          echo 'Tentativa '$i' falhou, aguardando...'
+          sleep 10
+        done
+        
+        echo '❌ Gateway não respondeu após 5 tentativas'
+        exit 1
+
+    - name: Notify Success
+      if: success()
+      run: |
+        echo "🎉 Deploy do Gateway realizado com sucesso!"
+        echo "🌐 Gateway disponível em: http://${{ secrets.EC2_HOST }}:8080"
+
+    - name: Notify Failure
+      if: failure()
+      run: |
+        echo "❌ Deploy do Gateway falhou!"
+        echo "📋 Verifique os logs acima para detalhes"

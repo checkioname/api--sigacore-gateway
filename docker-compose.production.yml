@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  sigacore-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile.production
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - JWT_SECRET=${JWT_SECRET}
+      - SIGACORE_SERVICE_URL=${SIGACORE_SERVICE_URL}
+      - SIGADOCS_SERVICE_URL=${SIGADOCS_SERVICE_URL}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - sigacore-network
+
+networks:
+  sigacore-network:
+    driver: bridge
