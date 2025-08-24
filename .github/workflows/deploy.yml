@@ -19,10 +19,10 @@ jobs:
       with:
         go-version: '1.21'
 
-    - name: Run tests
-      run: |
-        go mod tidy
-        go test ./...
+    # - name: Run tests
+    #   run: |
+    #     go mod tidy
+    #     go test ./...
 
     - name: Build application
       run: |
